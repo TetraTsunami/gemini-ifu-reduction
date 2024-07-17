@@ -1,2 +1,2 @@
 clean:
-	rm -r database *.fits *.log bd* blk*
+	rm -r database *.fits *.log bd* blk* tmp*

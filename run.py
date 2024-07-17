@@ -59,7 +59,7 @@ config = {
 }
 
 housekeeping(config)
-# create_MDF(config["mdf"], config["science"]["flatRefs"])
+# create_MDF(config["mdf"], config["standardStar"]["flatRefs"])
 
 def standard_star():
     refs = config["standardStar"]["refs"]
@@ -68,26 +68,29 @@ def standard_star():
     "Flats and sensitivity function"
     wavelength(config["standardStar"])
     flat_bundle_gaps(flats)
-    remove_scatter(flats, interactive=False, xorder=[3,3,3,3,3,3,3,3,3,3,3,3], yorder=[3])
+    remove_scatter(flats, interactive=False, xorder=[5], yorder=[6])
     qe_correct(flats, arcs)
     response_function(flats)
+    view_response(flats)
+    
     "Sensitivity function"
-    trace_reference(refs) # rg
-    remove_scatter(refs, gapSolution=flats[0], xorder=[3], yorder=[3], interactive=False) # b
-    skip_step(refs, "x", "brg")
+    sci_trace_reference(refs) # rg
+    remove_scatter(refs, gapSolution=flats[0], xorder=[5], yorder=[6], interactive=False) # b    
+    reject_cosmic_rays(refs) # x
+    # TODO: We are here
     sci_qe_correct(refs, arcs, flats) # eq
     skip_step(refs, "x", "eqxbrg")
     dw = angstroms_per_pixel(refs, arcs)
     rectify_spectra(refs, arcs, dw) # tx
     subtract_sky(refs) # s
-    sensitivity_function(config["standardStar"]) # TODO: less wiggly fit = higher order
+    sensitivity_function(config["standardStar"])
     
 def science_flats_arc(show=False):
     flats = config["science"]["flatRefs"]
     arcs = config["science"]["arcRefs"]
     wavelength(config["science"])
     flat_bundle_gaps(flats)
-    remove_scatter(flats, interactive=False, xorder=[3,3,3,3,3,3,3,3,3,3,3,3], yorder=[3])
+    remove_scatter(flats, interactive=False, xorder=[5], yorder=[6])
     qe_correct(flats, arcs)
     response_function(flats)
     if show:
@@ -97,20 +100,20 @@ def science():
     flats = config["science"]["flatRefs"]
     arcs = config["science"]["arcRefs"]
     refs = config["science"]["refs"]
-    # trace_reference(refs)
-    # remove_scatter(refs, gapSolution=flats[0], xorder=[3,3,3,3,3,3,3,3,3,1,2,3], yorder=[3], interactive=False)
-    # reject_cosmic_rays(refs) # long step!
-    # sci_qe_correct(refs, arcs, flats)
-    # for sci in refs:
-    #     iraf.gfdisplay('eqxbrg'+sci, 1, version='1')
-    # skip_step(refs, "x", "eqxbrg")
-    # dw = angstroms_per_pixel(refs, arcs)
-    # rectify_spectra(refs, arcs, dw) # long step :(
-    # subtract_sky(refs)
+    sci_trace_reference(refs)
+    remove_scatter(refs, gapSolution=flats[0], xorder=[3,3,3,3,3,3,3,3,3,1,2,3], yorder=[3], interactive=False)
+    reject_cosmic_rays(refs) # long step!
+    sci_qe_correct(refs, arcs, flats)
+    for sci in refs:
+        iraf.gfdisplay('eqxbrg'+sci, 1, version='1')
+    skip_step(refs, "x", "eqxbrg")
+    dw = angstroms_per_pixel(refs, arcs)
+    rectify_spectra(refs, arcs, dw) # long step :(
+    subtract_sky(refs)
     spectrophotometric(refs, config)
     encubenate(refs)
 
-standard_star()
-# science_flats_arc(False)
-# science()
+# standard_star()
+science_flats_arc(False)
+science()
 print("Finished :)")

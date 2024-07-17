@@ -1,3 +1,4 @@
+from time import sleep
 from pyraf import iraf
 from pyraf.iraf import gemini, gmos
 from astropy.io import fits
@@ -18,9 +19,9 @@ def housekeeping(config):
     if not os.path.isfile(biasPath):
         print("Making master bias")
         create_master_bias(config)
-    if not os.path.isfile(mdfPath):
-        print("Copying MDF")
-        iraf.copy(calDir+config["mdf"], ".", verbose="no")
+    # if not os.path.isfile(mdfPath):
+    #     print("Copying MDF")
+    #     iraf.copy(calDir+config["mdf"], ".", verbose="no")
     
 
 # FUNCTIONS THAT HELP OUT
@@ -61,12 +62,17 @@ def create_master_bias(biasRefs):
 
 def create_MDF(mdf, flatRefs):
     print("Creating MDF")
+    iraf.imdelete(iraf_list(flatRefs, "g"), verify="no")
+    iraf.imdelete(iraf_list(flatRefs, "rg"), verify="no")
     if (not os.path.isfile(mdf)):
         print("Copying new MDF")
         iraf.copy("gmos$data/"+mdf, ".", verbose="no")
-    trace_reference(rawDir, flatRefs[0], False)
-    iraf.imdelete(iraf_list(flatRefs[0], "erg"), verify="no")
-    iraf.gfextract(iraf_list(flatRefs[0], "rg"), fl_inter="yes")
+    iraf.gfreduce(iraf_list(flatRefs), rawpath=rawDir, fl_extract="no",    bias=biasPath, \
+        fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./",  \
+        slits="red", fl_fluxcal="no", fl_gscrrej="no", \
+        fl_wavtran="no", fl_skysub="no", fl_inter="no", fl_vardq="no", Stdout=1)
+    iraf.imdelete(iraf_list(flatRefs, "erg"), verify="no")
+    iraf.gfextract(iraf_list(flatRefs, "rg"), fl_inter="yes")
     
 def sensitivity_function(stdStar):
     """Calculates the sensitivity function for a standard star. Make sure to answer "yes" to the bandpass question.
@@ -110,7 +116,18 @@ def trace_reference(flatRefs):
     iraf.imdelete(iraf_list(flatRefs, "g"), verify="no")
     iraf.imdelete(iraf_list(flatRefs, "rg"), verify="no")
     iraf.imdelete(iraf_list(flatRefs, "erg"), verify="no")
+    
     iraf.gfreduce(iraf_list(flatRefs), rawpath=rawDir, fl_extract="yes",    bias=biasPath, \
+        fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./",  \
+        slits="red", fl_fluxcal="no", fl_gscrrej="no", \
+        fl_wavtran="no", fl_skysub="no", fl_inter="no", fl_vardq="yes", Stdout=1)
+    
+def sci_trace_reference(inRefs):
+    print("Making trace reference...")
+    iraf.imdelete(iraf_list(inRefs, "g"), verify="no")
+    iraf.imdelete(iraf_list(inRefs, "rg"), verify="no")
+    
+    iraf.gfreduce(iraf_list(inRefs), rawpath=rawDir, fl_extract="no",    bias=biasPath, \
         fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./",  \
         slits="red", fl_fluxcal="no", fl_gscrrej="no", \
         fl_wavtran="no", fl_skysub="no", fl_inter="no", fl_vardq="yes", Stdout=1)
