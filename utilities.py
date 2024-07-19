@@ -19,9 +19,6 @@ def housekeeping(config):
     if not os.path.isfile(biasPath):
         print("Making master bias")
         create_master_bias(config)
-    # if not os.path.isfile(mdfPath):
-    #     print("Copying MDF")
-    #     iraf.copy(calDir+config["mdf"], ".", verbose="no")
     
 
 # FUNCTIONS THAT HELP OUT
@@ -61,11 +58,11 @@ def create_master_bias(biasRefs):
     iraf.copy(masterBiasName, calDir)
 
 def create_MDF(mdf, flatRefs):
-    print("Creating MDF")
+    print("Viewing MDF")
     iraf.imdelete(iraf_list(flatRefs, "g"), verify="no")
     iraf.imdelete(iraf_list(flatRefs, "rg"), verify="no")
     if (not os.path.isfile(mdf)):
-        print("Copying new MDF")
+        print("Copying brand new MDF")
         iraf.copy("gmos$data/"+mdf, ".", verbose="no")
     iraf.gfreduce(iraf_list(flatRefs), rawpath=rawDir, fl_extract="no",    bias=biasPath, \
         fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./",  \

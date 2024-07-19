@@ -101,11 +101,9 @@ def science():
     arcs = config["science"]["arcRefs"]
     refs = config["science"]["refs"]
     sci_trace_reference(refs)
-    remove_scatter(refs, gapSolution=flats[0], xorder=[3,3,3,3,3,3,3,3,3,1,2,3], yorder=[3], interactive=False)
+    remove_scatter(refs, gapSolution=flats[0], xorder=[4], yorder=[3], interactive=False)
     reject_cosmic_rays(refs) # long step!
     sci_qe_correct(refs, arcs, flats)
-    for sci in refs:
-        iraf.gfdisplay('eqxbrg'+sci, 1, version='1')
     skip_step(refs, "x", "eqxbrg")
     dw = angstroms_per_pixel(refs, arcs)
     rectify_spectra(refs, arcs, dw) # long step :(
