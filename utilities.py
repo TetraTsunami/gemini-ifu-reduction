@@ -13,12 +13,10 @@ masterBiasName = "bias.fits"
 biasPath = calDir + masterBiasName
 mdfPath = "gnifu_slitr_mdf.fits"
 
-def housekeeping(config):
+def housekeeping():
     iraf.delete("tmp*")
     iraf.delete("*.log")
-    if not os.path.isfile(biasPath):
-        print("Making master bias")
-        create_master_bias(config)
+        
     
 
 # FUNCTIONS THAT HELP OUT
@@ -52,9 +50,10 @@ def view_response(flatRefs):
         iraf.gfdisplay(flat+"_resp", 1, version="1")
 
 # FUNCTIONS THAT PROCESS THINGS
-def create_master_bias(biasRefs):
+def create_master_bias(config):
+    biasRefs = config["biasesRefs"]
     iraf.imdelete(biasPath, verify="no")
-    iraf.gbias(iraf_list(biasRefs), masterBiasName, rawpath=biasDir, fl_vardq="yes", Stdout=1)
+    iraf.gbias(iraf_list(biasRefs), masterBiasName, rawpath=biasDir, fl_vardq="yes")
     iraf.copy(masterBiasName, calDir)
 
 def create_MDF(mdf, flatRefs):
@@ -92,12 +91,19 @@ def sensitivity_function(stdStar):
 def wavelength(inObs):
     flatRefs = inObs["flatRefs"]
     arcRefs = inObs["arcRefs"]
-    print("Finding wavelength solution...")
-    trace_reference(flatRefs)
-    print("Extracting arc")
+    iraf.imdelete(iraf_list(flatRefs, "g"), verify="no")
+    iraf.imdelete(iraf_list(flatRefs, "rg"), verify="no")
+    iraf.imdelete(iraf_list(flatRefs, "erg"), verify="no")
     iraf.imdelete(iraf_list(arcRefs, "g"), verify="no")
     iraf.imdelete(iraf_list(arcRefs, "rg"), verify="no")
     iraf.imdelete(iraf_list(arcRefs, "erg"), verify="no")
+    print("Finding wavelength solution...")
+    print("Extracting flats")
+    iraf.gfreduce(iraf_list(flatRefs), rawpath=rawDir, fl_extract="yes",    bias=biasPath, \
+        fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./",  \
+        slits="red", fl_fluxcal="no", fl_gscrrej="no", \
+        fl_wavtran="no", fl_skysub="no", fl_inter="no", fl_vardq="yes")
+    print("Extracting arc")
     iraf.gfreduce(iraf_list(arcRefs), rawpath=rawDir, fl_extract="yes", recenter="no", \
         trace="no", reference=iraf_list(flatRefs, "erg"), fl_bias="no", \
         fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./", \
@@ -106,18 +112,7 @@ def wavelength(inObs):
     print("Finding solution (interactive)")
     iraf.gswavelength(iraf_list(arcRefs, "erg"), \
         nlost=10, ntarget=15, threshold=25, \
-        coordlis="gmos$data/GCALcuar.dat", fl_inter="yes", Stdout=1)    
-
-def trace_reference(flatRefs):
-    print("Making trace reference...")
-    iraf.imdelete(iraf_list(flatRefs, "g"), verify="no")
-    iraf.imdelete(iraf_list(flatRefs, "rg"), verify="no")
-    iraf.imdelete(iraf_list(flatRefs, "erg"), verify="no")
-    
-    iraf.gfreduce(iraf_list(flatRefs), rawpath=rawDir, fl_extract="yes",    bias=biasPath, \
-        fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./",  \
-        slits="red", fl_fluxcal="no", fl_gscrrej="no", \
-        fl_wavtran="no", fl_skysub="no", fl_inter="no", fl_vardq="yes", Stdout=1)
+        coordlis="gmos$data/GCALcuar.dat", fl_inter="yes")    
     
 def sci_trace_reference(inRefs):
     print("Making trace reference...")

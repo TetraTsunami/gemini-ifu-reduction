@@ -11,38 +11,27 @@ config = {
     "observatory": "Gemini-North",
     # Biases
     "biasesRefs": [
-        "N20240609S0158",
-        "N20240609S0157",
-        "N20240609S0159",
-        "N20240609S0160",
-        "N20240609S0161",
-        "N20240610S0227",
-        "N20240610S0228",
-        "N20240610S0229",
-        "N20240610S0230",
-        "N20240610S0231",
-        "N20240611S0150",
-        "N20240611S0151",
-        "N20240611S0152",
-        "N20240611S0153",
-        "N20240611S0154",
-        "N20240612S0142",
-        "N20240613S0168",
-        "N20240613S0169",
-        "N20240613S0170",
-        "N20240613S0171",
-        "N20240613S0172",
-        "N20240613S0267",
-        "N20240613S0268",
-        "N20240613S0269",
-        "N20240614S0001",
-        "N20240614S0002"
+        "N20240630S0004",
+        "N20240630S0005",
+        "N20240630S0006",
+        "N20240630S0007",
+        "N20240630S0008",
+        "N20240710S0017",
+        "N20240710S0018",
+        "N20240710S0019",
+        "N20240710S0020",
+        "N20240710S0021",
+        "N20240607S0003",
+        "N20240607S0004",
+        "N20240607S0005",
+        "N20240607S0006",
+        "N20240607S0007",
     ],
     # Science
     "science": {
-        "refs": ["N20240609S0067"],
-        "flatRefs": ["N20240609S0066"],
-        "arcRefs": ["N20240609S0151"],
+        "refs": ["N20240706S0082"],
+        "flatRefs": ["N20240706S0083"],
+        "arcRefs": ["N20240706S0206"],
         "bpmRef": "../data/bpm_20230729_gmos-n_Ham_11_full_12amp.fits",
     },
     # Standard Star
@@ -52,14 +41,15 @@ config = {
         "caldir": 'onedstds$spec50cal/',
         "extinction": 'gmos$calib/mkoextinct.dat',
         "refs": ["N20240611S0118"],
-        "flatRefs": ["N20240611S0119"],
+        "flatRefs": ["N20240706S0080"],
         "arcRefs": ["N20240611S0149"],
         "bpmRef": "../data/bpm_20230729_gmos-n_Ham_11_full_12amp.fits",
     },
 }
 
-housekeeping(config)
-# create_MDF(config["mdf"], config["standardStar"]["flatRefs"])
+housekeeping()
+# create_master_bias(config)
+# create_MDF(config["mdf"], config["science"]["flatRefs"])
 
 def standard_star():
     refs = config["standardStar"]["refs"]
@@ -88,7 +78,7 @@ def standard_star():
 def science_flats_arc(show=False):
     flats = config["science"]["flatRefs"]
     arcs = config["science"]["arcRefs"]
-    wavelength(config["science"])
+    # wavelength(config["science"])
     flat_bundle_gaps(flats)
     remove_scatter(flats, interactive=False, xorder=[5], yorder=[6])
     qe_correct(flats, arcs)
