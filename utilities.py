@@ -9,6 +9,7 @@ rawDir = "../data/"
 biasDir = "../data/biases/"
 calDir = "../calibrations/"
 masterBiasName = "bias.fits"
+bpmRef = "../data/bpm_20230729_gmos-n_Ham_11_full_12amp.fits"
 
 biasPath = calDir + masterBiasName
 mdfPath = "gnifu_slitr_mdf.fits"
@@ -99,7 +100,7 @@ def wavelength(inObs):
     iraf.imdelete(iraf_list(arcRefs, "erg"), verify="no")
     print("Finding wavelength solution...")
     print("Extracting flats")
-    iraf.gfreduce(iraf_list(flatRefs), rawpath=rawDir, fl_extract="yes",    bias=biasPath, \
+    iraf.gfreduce(iraf_list(flatRefs), rawpath=rawDir, fl_extract="yes", bias=biasPath, \
         fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./",  \
         slits="red", fl_fluxcal="no", fl_gscrrej="no", \
         fl_wavtran="no", fl_skysub="no", fl_inter="no", fl_vardq="yes")

@@ -29,8 +29,8 @@ config = {
     ],
     # Science
     "science": {
-        "refs": ["N20240706S0082"],
-        "flatRefs": ["N20240706S0083"],
+        "refs": ["N20240706S0081"],
+        "flatRefs": ["N20240706S0080"],
         "arcRefs": ["N20240706S0206"],
         "bpmRef": "../data/bpm_20230729_gmos-n_Ham_11_full_12amp.fits",
     },
