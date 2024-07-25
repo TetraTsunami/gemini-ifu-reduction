@@ -1,8 +1,22 @@
+import sys
 from pyraf import iraf
 
 from utilities import *
 
 iraf.set(stdimage="imtgmos")
+
+# Completed observations:
+# 702S0060
+# 702S0063
+# 609S0067
+# 706S0081
+# 706S0082
+# N20240609S0068.fits
+# N20240609S0069.fits
+
+# Silly
+# N20240609S0072.fits
+# N20240609S0073.fits 	
 
 # See config in utilities.py too
 config = {
@@ -29,9 +43,9 @@ config = {
     ],
     # Science
     "science": {
-        "refs": ["N20240706S0081"],
-        "flatRefs": ["N20240706S0080"],
-        "arcRefs": ["N20240706S0206"],
+        "refs": ["N20240702S0060"],
+        "flatRefs": ["N20240702S0061"],
+        "arcRefs": ["N20240702S0124"],
         "bpmRef": "../data/bpm_20230729_gmos-n_Ham_11_full_12amp.fits",
     },
     # Standard Star
@@ -41,7 +55,7 @@ config = {
         "caldir": 'onedstds$spec50cal/',
         "extinction": 'gmos$calib/mkoextinct.dat',
         "refs": ["N20240611S0118"],
-        "flatRefs": ["N20240706S0080"],
+        "flatRefs": ["N20240611S0119"],
         "arcRefs": ["N20240611S0149"],
         "bpmRef": "../data/bpm_20230729_gmos-n_Ham_11_full_12amp.fits",
     },
@@ -58,16 +72,16 @@ def standard_star():
     "Flats and sensitivity function"
     wavelength(config["standardStar"])
     flat_bundle_gaps(flats)
-    remove_scatter(flats, interactive=False, xorder=[5], yorder=[6])
+    remove_scatter(flats, interactive=False, xorder=[6], yorder=[5])
     qe_correct(flats, arcs)
     response_function(flats)
-    view_response(flats)
+    # view_response(flats)
     
     "Sensitivity function"
     sci_trace_reference(refs) # rg
-    remove_scatter(refs, gapSolution=flats[0], xorder=[5], yorder=[6], interactive=False) # b    
-    reject_cosmic_rays(refs) # x
-    # TODO: We are here
+    remove_scatter(refs, gapSolution=flats[0], xorder=[4], yorder=[4], interactive=False) # b    
+    view_scatter(refs)
+    skip_step(refs, "x", "brg")
     sci_qe_correct(refs, arcs, flats) # eq
     skip_step(refs, "x", "eqxbrg")
     dw = angstroms_per_pixel(refs, arcs)
@@ -78,9 +92,11 @@ def standard_star():
 def science_flats_arc(show=False):
     flats = config["science"]["flatRefs"]
     arcs = config["science"]["arcRefs"]
-    # wavelength(config["science"])
+    wavelength(config["science"])
     flat_bundle_gaps(flats)
-    remove_scatter(flats, interactive=False, xorder=[5], yorder=[6])
+    remove_scatter(flats, interactive=False, xorder=[6], yorder=[6])
+    # view_scatter(flats)
+    # sys.exit()
     qe_correct(flats, arcs)
     response_function(flats)
     if show:
@@ -101,7 +117,7 @@ def science():
     spectrophotometric(refs, config)
     encubenate(refs)
 
-# standard_star()
+standard_star()
 science_flats_arc(False)
 science()
 print("Finished :)")
