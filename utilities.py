@@ -15,6 +15,7 @@ biasPath = calDir + masterBiasName
 mdfPath = "gnifu_slitr_mdf.fits"
 
 def housekeeping():
+    # iraf.delete("database/*")
     iraf.delete("tmp*")
     iraf.delete("*.log")
         
@@ -50,6 +51,10 @@ def view_response(flatRefs):
     for flat in flatRefs:
         iraf.gfdisplay(flat+"_resp", 1, version="1")
 
+def view_scatter(refs):
+    for ref in refs:
+        for i in range(3):
+            iraf.imexamine('brg'+ref+'[sci,'+str(i+1)+']', 1)
 # FUNCTIONS THAT PROCESS THINGS
 def create_master_bias(config):
     biasRefs = config["biasesRefs"]
@@ -103,7 +108,7 @@ def wavelength(inObs):
     iraf.gfreduce(iraf_list(flatRefs), rawpath=rawDir, fl_extract="yes", bias=biasPath, \
         fl_over="yes", fl_trim="yes", mdffile=mdfPath, mdfdir="./",  \
         slits="red", fl_fluxcal="no", fl_gscrrej="no", \
-        fl_wavtran="no", fl_skysub="no", fl_inter="no", fl_vardq="yes")
+        fl_wavtran="no", fl_skysub="no", fl_inter="no", fl_vardq="yes", bpmfile=bpmRef)
     print("Extracting arc")
     iraf.gfreduce(iraf_list(arcRefs), rawpath=rawDir, fl_extract="yes", recenter="no", \
         trace="no", reference=iraf_list(flatRefs, "erg"), fl_bias="no", \
@@ -179,7 +184,7 @@ def sci_qe_correct(inRefs, refArcs, refFlats):
                 fl_vardq="yes", verbose="yes")
         iraf.gfextract("qxbrg"+img, response=response, recenter="no", \
                 trace="no", reference=refflat, weights="none", \
-                fl_vardq="yes")
+                fl_vardq="yes", bpmfile=bpmRef)
        
 # fxhead eqxbrgS20060327S0043 to find width/height
 def bad_column_fix(inRefs, badCols, width, height):
