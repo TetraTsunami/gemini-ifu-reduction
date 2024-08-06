@@ -1,22 +1,10 @@
+# Heavily based on the work at https://gmos-ifu-1-data-reduction-tutorial-gemini-iraf.readthedocs.io/en/latest/
 import sys
 from pyraf import iraf
 
 from utilities import *
 
 iraf.set(stdimage="imtgmos")
-
-# Completed observations:
-# 702S0060
-# 702S0063
-# 609S0067
-# 706S0081
-# 706S0082
-# N20240609S0068.fits
-# N20240609S0069.fits
-
-# Silly
-# N20240609S0072.fits
-# N20240609S0073.fits 	
 
 # See config in utilities.py too
 config = {
@@ -43,9 +31,9 @@ config = {
     ],
     # Science
     "science": {
-        "refs": ["N20240702S0060"],
-        "flatRefs": ["N20240702S0061"],
-        "arcRefs": ["N20240702S0124"],
+        "refs": ["N20240702S0063"],
+        "flatRefs": ["N20240702S0062"],
+        "arcRefs": ["N20240702S0125"],
         "bpmRef": "../data/bpm_20230729_gmos-n_Ham_11_full_12amp.fits",
     },
     # Standard Star
@@ -73,6 +61,7 @@ def standard_star():
     wavelength(config["standardStar"])
     flat_bundle_gaps(flats)
     remove_scatter(flats, interactive=False, xorder=[6], yorder=[5])
+    view_scatter(flats)
     qe_correct(flats, arcs)
     response_function(flats)
     # view_response(flats)
@@ -94,8 +83,8 @@ def science_flats_arc(show=False):
     arcs = config["science"]["arcRefs"]
     wavelength(config["science"])
     flat_bundle_gaps(flats)
-    remove_scatter(flats, interactive=False, xorder=[6], yorder=[6])
-    # view_scatter(flats)
+    remove_scatter(flats, interactive=False, xorder=[5], yorder=[3])
+    view_scatter(flats)
     # sys.exit()
     qe_correct(flats, arcs)
     response_function(flats)
@@ -120,4 +109,5 @@ def science():
 standard_star()
 science_flats_arc(False)
 science()
+seeing(config["science"]["refs"])
 print("Finished :)")

@@ -27,8 +27,8 @@ def skip_step(inRefs, addPrefix, inPrefix):
     for ref in inRefs:
         iraf.copy(inPrefix+ref+'.fits', addPrefix+inPrefix+ref+'.fits')
 
-def iraf_list(lst, prefix=""):
-    return ",".join(map(lambda x: prefix+x, lst))
+def iraf_list(lst, prefix="", suffix=""):
+    return ",".join(map(lambda x: prefix+x+suffix, lst))
   
 def display_image(image):
     try:
@@ -246,3 +246,11 @@ def encubenate(inRefs):
         iraf.gfcube("cstxeqxbrg"+img,
             outimage="cstxeqxbrg"+img+"_3D", fl_atmdisp="yes", \
             fl_var="yes", fl_dq="yes")
+        
+def seeing(inRefs):
+    iraf.imdelete(iraf_list(inRefs, suffix="_collapsed"), verify="no")
+    for sci in inRefs:
+        iraf.imdelete(sci+'_collapsed')
+        iraf.imcombine('cstxeqxbrg'+sci+'_3D.fits[sci,1][*,*,400:4747]', 
+                       sci+'_collapsed', project='yes')
+        iraf.imexamine(sci+'_collapsed', 1)

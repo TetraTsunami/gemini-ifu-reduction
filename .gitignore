@@ -1,0 +1,8 @@
+*.fits
+*.log
+*.pyc
+.vscode
+database
+blkmask_*
+lacos*
+tmp*
